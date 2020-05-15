@@ -22,9 +22,9 @@ jobs:
       run: |
         # Build and test the project, then
         # deploy to Azure Web App.
-        npm install
-        npm run build --if-present
-        npm run test --if-present
+        npm install ./socket.io_test
+        npm run build --if-present ./socket.io_test
+        npm run test --if-present ./socket.io_test
     - name: 'Deploy to Azure WebApp'
       uses: azure/webapps-deploy@v2
       with:
