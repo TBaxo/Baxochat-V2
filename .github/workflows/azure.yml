@@ -5,7 +5,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: baxochat-v2   # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: './socket.io_test'      # set this to the path to your web app project, defaults to the repository root
+  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '12.16.1'                # set this to the node version to use
 
 jobs:
@@ -22,9 +22,9 @@ jobs:
       run: |
         # Build and test the project, then
         # deploy to Azure Web App.
-        npm install ./socket.io_test
-        npm run build --if-present ./socket.io_test
-        npm run test --if-present ./socket.io_test
+        npm install socket.io_test
+        npm run build --if-present socket.io_test
+        npm run test --if-present socket.io_test
     - name: 'Deploy to Azure WebApp'
       uses: azure/webapps-deploy@v2
       with:
