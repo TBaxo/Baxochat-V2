@@ -1,6 +1,7 @@
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - dev
 
 env:
   AZURE_WEBAPP_NAME: baxochat-v2   # set this to your application's name
