@@ -12,11 +12,11 @@ jobs:
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
-        
+    defaults:
+      run:
+        working-directory: ./socket.io_test
     steps:
     - uses: actions/checkout@v2
-      with:
-          path: ./socket.io_test
     - name: Use Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v1
       with:
@@ -28,7 +28,6 @@ jobs:
         npm install
         npm run build --if-present 
         npm run test --if-present
-        working-directory: ./socket.io_test
     - name: 'Deploy to Azure WebApp'
       uses: azure/webapps-deploy@v2
       with:
