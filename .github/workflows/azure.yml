@@ -12,10 +12,10 @@ jobs:
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
+    working-directory: socket.io_test
     steps:
     - uses: actions/checkout@v2
       with:
-        path: socket.io_test
 
     - name: Use Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v1
