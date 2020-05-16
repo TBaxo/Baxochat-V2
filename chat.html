@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Socket.IO chat</title>
+    <link rel="stylesheet" type="text/css" href="/styles/chat.css">
+</head>
+
+<body>
+    <ul id="messages"></ul>
+    <form action="">
+        <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+</body>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const utils = {
+        getUrlParameter: function (sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        }
+    };
+
+    const chat = {
+        appendMessage: function (text) {
+            var html = document.createElement('li');
+            html.innerHTML = text;
+            messagesContainer.appendChild(html);
+        }
+    }
+    var messageInput = document.getElementById('m');
+    var messagesContainer = document.getElementById('messages');
+
+    var username = utils.getUrlParameter('username');
+    var socket = io(window.location.origin, { query: `username=${username}` });
+
+    document.getElementsByTagName('form')[0].addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        let message = {
+            username: username,
+            text: messageInput.value
+        }
+
+        socket.emit('chat_message', message);
+        messageInput.value = '';
+        return false;
+    });
+
+    socket.on('chat_message', (msg) => {
+        let { username, text } = msg;
+        var item = `${username}: ${text}`
+
+        chat.appendMessage(item);
+    });
+
+    socket.on('user_join', (msg) => {
+        chat.appendMessage(msg);
+    });
+</script>
+
+</html>

@@ -2,82 +2,20 @@
 <html>
 
 <head>
-    <title>Socket.IO chat</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font: 13px Helvetica, Arial;
-        }
-
-        form {
-            background: #000;
-            padding: 3px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-
-        form input {
-            border: 0;
-            padding: 10px;
-            width: 90%;
-            margin-right: 0.5%;
-        }
-
-        form button {
-            width: 9%;
-            background: rgb(130, 224, 255);
-            border: none;
-            padding: 10px;
-        }
-
-        #messages {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        #messages li {
-            padding: 5px 10px;
-        }
-
-        #messages li:nth-child(odd) {
-            background: #eee;
-        }
-    </style>
+    <title>Baxochat-v2</title>
+    <link rel="stylesheet" type="text/css" href="/styles/index.css">
 </head>
 
 <body>
-    <ul id="messages"></ul>
-    <form action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
+    <div id="login">
+        <span id="login__header">Baxochat-v2</span>
+        <form id="login__form" action="/" method="post">
+            <div id="login__control">
+                <input id="login__username" name="username">
+                <button id="login__submit">Login</button>
+            </div>
+        </form>
+    </div>
 </body>
-
-
-<script src="/socket.io/socket.io.js"></script>
-<script>
-    var messageInput = document.getElementById('m');
-    var messagesContainer = document.getElementById('messages');
-    var socket = io();
-
-    document.getElementsByTagName('form')[0].addEventListener('submit', (e) => {
-        e.preventDefault();
-        socket.emit('chat_message', messageInput.value);
-        messageInput.value = '';
-        return false;
-    });
-
-    socket.on('chat_message', (msg) => {
-        var html = document.createElement('li');
-        html.innerHTML = msg;
-        messagesContainer.appendChild(html);
-    });
-</script>
 
 </html>
