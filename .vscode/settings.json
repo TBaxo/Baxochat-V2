@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/90607fb8-518f-49f3-bd0c-7cbc0ac54b3a/resourceGroups/baxochat-v2/providers/Microsoft.Web/sites/baxochat-v2",
+    "appService.deploySubpath": ""
+}
