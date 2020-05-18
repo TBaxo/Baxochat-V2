@@ -18,7 +18,13 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', function (req, res) {
-    var endpoint = `/chat?username=${req.body.username}`
+    let username = req.body.username;
+
+    if (Object.values(connected_users).includes(username)) {
+        res.sendFile(__dirname + '/index.html');
+    }
+
+    let endpoint = `/chat?username=${username}`;
     res.redirect(endpoint);
 });
 
