@@ -149,6 +149,10 @@ var App = function () {
         event.preventDefault();
         if (!chat)
             return;
+        if (chat.length >= 200) {
+            alert("too many characters");
+            return null;
+        }
         var message = {
             username: ownUsername,
             text: chat

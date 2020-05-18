@@ -61,6 +61,11 @@ const App = () => {
 
         if (!chat) return;
 
+        if (chat.length >= 200) {
+            alert("too many characters");
+            return null;
+        }
+
         let message = {
             username: ownUsername,
             text: chat
