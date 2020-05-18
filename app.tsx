@@ -85,6 +85,11 @@ const App = () => {
         socket.on('user_join', (msg) => {
             setMessages(msgs => msgs.concat(msg));
         });
+
+        socket.on('disconnect', () => {
+            alert("disconnected");
+        });
+
     }, [socket]);
 
     useEffect(() => {
