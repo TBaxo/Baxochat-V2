@@ -122,8 +122,15 @@ var react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/reac
 var react_dom_1 = __importDefault(__webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js"));
 var socket_io_client_1 = __importDefault(__webpack_require__(/*! socket.io-client */ "./node_modules/socket.io-client/lib/index.js"));
 var uuid_1 = __webpack_require__(/*! uuid */ "./node_modules/uuid/dist/esm-browser/index.js");
-var SidebarOnline = function () {
-    return (react_1.default.createElement("div", { id: 'sidebar-online' }));
+var SidebarOnline = function (props) {
+    return (react_1.default.createElement("div", { id: 'sidebar-online' },
+        react_1.default.createElement("div", null,
+            react_1.default.createElement("span", null,
+                "Users Online -- ",
+                props.users.length)),
+        react_1.default.createElement("ul", { id: 'sidebar-list' }, props.users.map(function (user) {
+            return (react_1.default.createElement("li", { className: 'sidebar-list__item', key: user }, user));
+        }))));
 };
 var MessageItem = function (props) { return (react_1.default.createElement("li", null, props.message)); };
 var MessageBox = function (props) { return (react_1.default.createElement("ul", { id: 'messages' }, props.messages.map(function (message) {
@@ -133,7 +140,8 @@ var App = function () {
     var _a = react_1.useState(null), socket = _a[0], setSocket = _a[1];
     var _b = react_1.useState(utils.getUrlParameter('username')), ownUsername = _b[0], setOwnUsername = _b[1];
     var _c = react_1.useState([]), messages = _c[0], setMessages = _c[1];
-    var _d = react_1.useState(""), chat = _d[0], setChat = _d[1];
+    var _d = react_1.useState([ownUsername]), users = _d[0], setUsers = _d[1];
+    var _e = react_1.useState(""), chat = _e[0], setChat = _e[1];
     var handleChange = function (event) {
         setChat(event.target.value);
     };
@@ -164,8 +172,18 @@ var App = function () {
             var message = username + ": " + text;
             setMessages(function (msgs) { return msgs.concat(message); });
         });
-        socket.on('user_join', function (msg) {
-            setMessages(function (msgs) { return msgs.concat(msg); });
+        socket.on('user_join', function (data) {
+            setUsers(data.connectedusers);
+            if (data.username === ownUsername)
+                return;
+            setMessages(function (msgs) { return msgs.concat(data.text); });
+        });
+        socket.on('user_leave', function (data) {
+            setMessages(function (msgs) { return msgs.concat(data.text); });
+            setUsers(data.connectedusers);
+        });
+        socket.on('disconnect', function () {
+            alert("disconnected");
         });
     }, [socket]);
     react_1.useEffect(function () {
@@ -174,7 +192,7 @@ var App = function () {
     }, [messages]);
     return (react_1.default.createElement("div", { id: 'container' },
         react_1.default.createElement(MessageBox, { messages: messages }),
-        react_1.default.createElement(SidebarOnline, null),
+        react_1.default.createElement(SidebarOnline, { users: users }),
         react_1.default.createElement("form", { id: 'chat', onSubmit: handleSubmit },
             react_1.default.createElement("input", { id: "m", autoComplete: 'off', value: chat, onChange: handleChange }),
             react_1.default.createElement("button", null, "Send"))));

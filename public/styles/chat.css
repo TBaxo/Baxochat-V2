@@ -28,7 +28,6 @@ html, body {
 }
 
 #messages {
-    display: inline-block;
     grid-area: messages;
     list-style-type: none;
     margin: 0;
@@ -45,12 +44,21 @@ html, body {
 }
 
 #sidebar-online{
-    display: inline-block;
     grid-area: sidebar;
 }
 
+#sidebar-list{
+    padding-left: 5px;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-list__item {
+
+}
+
 #chat{
-    display: inline-block;
     grid-area: chat;
     background: #000;
     padding: 1px;

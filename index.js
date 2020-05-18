@@ -33,20 +33,34 @@ io.on('connection', (socket) => {
 
     if (!connected_users[socket.id]) {
 
-        socket.on("chat_message", (msg) => {
+        connected_users[socket.id] = username;
 
+        let data = {
+            username: username,
+            text: `${username} has joined the chat`,
+            connectedusers: Object.values(connected_users)
+        };
+
+        io.emit("user_join", data);
+
+        socket.on("chat_message", (msg) => {
             socket.broadcast.emit("chat_message", msg);
         });
 
-        socket.broadcast.emit("user_join", `${username} has joined the chat`);
-
         socket.on('disconnect', () => {
-            console.log('user disconnected');
+            let disconnectedUsername = connected_users[socket.id];
+            console.log(`${disconnectedUsername} has disconnected`);
 
             delete connected_users[socket.id];
-        });
 
-        connected_users[socket.id] = username;
+            let data = {
+                username: disconnectedUsername,
+                text: `${disconnectedUsername} has left the chat`,
+                connectedusers: Object.values(connected_users)
+            };
+
+            io.emit('user_leave', data);
+        });
     }
 });
 

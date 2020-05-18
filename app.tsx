@@ -6,11 +6,20 @@ import client from "socket.io-client";
 import { v4 as uuidv4 } from 'uuid';
 
 
-const SidebarOnline = () => {
+const SidebarOnline = (props) => {
     return (
         <div id='sidebar-online'>
-
-        </div>
+            <div>
+                <span>Users Online -- {props.users.length}</span>
+            </div>
+            <ul id='sidebar-list'>
+                {props.users.map((user) => {
+                    return (
+                        <li className='sidebar-list__item' key={user}>{user}</li>
+                    )
+                })}
+            </ul>
+        </div >
     )
 }
 
@@ -39,6 +48,7 @@ const App = () => {
     const [socket, setSocket] = useState(null);
     const [ownUsername, setOwnUsername] = useState(utils.getUrlParameter('username'));
     const [messages, setMessages] = useState([]);
+    const [users, setUsers] = useState([ownUsername]);
     const [chat, setChat] = useState("");
 
 
@@ -82,8 +92,18 @@ const App = () => {
             setMessages(msgs => msgs.concat(message));
         });
 
-        socket.on('user_join', (msg) => {
-            setMessages(msgs => msgs.concat(msg));
+        socket.on('user_join', (data) => {
+            setUsers(data.connectedusers);
+
+            if (data.username === ownUsername) return;
+
+            setMessages(msgs => msgs.concat(data.text));
+        });
+
+        socket.on('user_leave', (data) => {
+
+            setMessages(msgs => msgs.concat(data.text));
+            setUsers(data.connectedusers);
         });
 
         socket.on('disconnect', () => {
@@ -100,7 +120,7 @@ const App = () => {
     return (
         <div id='container'>
             <MessageBox messages={messages} />
-            <SidebarOnline />
+            <SidebarOnline users={users} />
             <form id='chat' onSubmit={handleSubmit}>
                 <input id="m" autoComplete='off' value={chat} onChange={handleChange} />
                 <button>Send</button>
