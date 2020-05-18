@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
 
         socket.on("chat_message", (msg) => {
 
-            io.emit("chat_message", msg);
+            socket.broadcast.emit("chat_message", msg);
         });
 
         socket.broadcast.emit("user_join", `${username} has joined the chat`);

@@ -3,6 +3,16 @@ declare var require: any
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import client from "socket.io-client";
+import { v4 as uuidv4 } from 'uuid';
+
+
+const SidebarOnline = () => {
+    return (
+        <div id='sidebar-online'>
+
+        </div>
+    )
+}
 
 const MessageItem = (props) => (
     <li>
@@ -10,13 +20,14 @@ const MessageItem = (props) => (
     </li>
 )
 
+
 const MessageBox = (props) => (
     <ul id='messages'>
         {props.messages.map((message) => {
             return (
                 <MessageItem
                     message={message}
-                    key={props.messages.indexOf(message)}
+                    key={uuidv4()}
                 />
             )
         })}
@@ -26,9 +37,10 @@ const MessageBox = (props) => (
 const App = () => {
 
     const [socket, setSocket] = useState(null);
-    const [username, setUsername] = useState(utils.getUrlParameter('username'));
+    const [ownUsername, setOwnUsername] = useState(utils.getUrlParameter('username'));
     const [messages, setMessages] = useState([]);
     const [chat, setChat] = useState("");
+
 
     const handleChange = (event) => {
         setChat(event.target.value);
@@ -37,18 +49,25 @@ const App = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
+        if (!chat) return;
+
         let message = {
-            username: username,
+            username: ownUsername,
             text: chat
         }
 
         socket.emit('chat_message', message);
+
+        let { username, text } = message;
+        let msg = `${username}: ${text}`
+
+        setMessages(msgs => msgs.concat(msg));
         setChat("");
         return false;
     };
 
     useEffect(() => {
-        setSocket(client(window.location.origin, { query: `username=${username}` }));
+        setSocket(client(window.location.origin, { query: `username=${ownUsername}` }));
     }, []);
 
     useEffect(() => {
@@ -58,9 +77,9 @@ const App = () => {
 
         socket.on('chat_message', (msg) => {
             let { username, text } = msg;
-            let item = `${username}: ${text}`
+            let message = `${username}: ${text}`
 
-            setMessages(msgs => msgs.concat(item));
+            setMessages(msgs => msgs.concat(message));
         });
 
         socket.on('user_join', (msg) => {
@@ -68,20 +87,22 @@ const App = () => {
         });
     }, [socket]);
 
+    useEffect(() => {
+        let messageBox = document.querySelector('#messages');
+        messageBox.scrollTop = messageBox.scrollHeight;
+    }, [messages]);
+
     return (
-        <>
+        <div id='container'>
             <MessageBox messages={messages} />
-            <form onSubmit={handleSubmit}>
-                <input id="m" autoComplete="off" value={chat} onChange={handleChange} />
+            <SidebarOnline />
+            <form id='chat' onSubmit={handleSubmit}>
+                <input id="m" autoComplete='off' value={chat} onChange={handleChange} />
                 <button>Send</button>
             </form>
-        </>
+        </div>
     )
 }
-
-
-
-
 
 const utils = {
     getUrlParameter: function (sParam) {
@@ -99,6 +120,5 @@ const utils = {
         }
     }
 };
-
 
 ReactDOM.render(<App />, document.getElementById('root'));
