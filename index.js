@@ -9,6 +9,7 @@ const connected_users = {};
 
 
 app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/dist'));
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 
@@ -24,6 +25,7 @@ app.post('/', function (req, res) {
 app.get('/chat', (req, res) => {
     res.sendFile(__dirname + '/chat.html');
 });
+
 
 io.on('connection', (socket) => {
     let username = socket.handshake.query.username;
