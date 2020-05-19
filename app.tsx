@@ -6,28 +6,11 @@ import client from "socket.io-client";
 import { v4 as uuidv4 } from 'uuid';
 
 
-const SidebarOnline = (props) => {
-    return (
-        <div id='sidebar-online'>
-            <div>
-                <span>Users Online -- {props.users.length}</span>
-            </div>
-            <ul id='sidebar-list'>
-                {props.users.map((user) => {
-                    return (
-                        <li className='sidebar-list__item' key={user}>{user}</li>
-                    )
-                })}
-            </ul>
-        </div >
-    )
-}
-
 const MessageItem = (props) => (
     <li>
         {props.message}
     </li>
-)
+);
 
 
 const MessageBox = (props) => (
@@ -43,6 +26,50 @@ const MessageBox = (props) => (
     </ul>
 );
 
+const ChatBox = (props) => {
+    //contains div, input and button
+    const convertUsersTypingToString = (usersTyping) => {
+        if (usersTyping.length <= 0) return "";
+
+        if (usersTyping.length === 1) return `${usersTyping[0]} is typing...`;
+
+        if (usersTyping.length === 3) return `Several users are typing...`
+
+        return `${usersTyping.join(' and ')} are typing...`
+    };
+
+    return (
+        <div id='chat'>
+            <form id='chat-form' onSubmit={props.onSubmit}>
+                <input id="m" autoComplete='off' value={props.value} onChange={props.onChange} />
+                <button>Send</button>
+            </form>
+            <div>
+                <span>
+                    {convertUsersTypingToString(props.usersTyping)}
+                </span>
+            </div>
+        </div>
+    )
+};
+
+const SidebarOnline = (props) => {
+    return (
+        <div id='sidebar-online'>
+            <div>
+                <span>Users Online -- {props.users.length}</span>
+            </div>
+            <ul id='sidebar-list'>
+                {props.users.map((user) => {
+                    return (
+                        <li className='sidebar-list__item' key={user}>{user}</li>
+                    )
+                })}
+            </ul>
+        </div >
+    )
+};
+
 const App = () => {
 
     const [socket, setSocket] = useState(null);
@@ -50,16 +77,26 @@ const App = () => {
     const [messages, setMessages] = useState([]);
     const [users, setUsers] = useState([ownUsername]);
     const [chat, setChat] = useState("");
+    const [usersTyping, setUsersTyping] = useState([]);
 
 
     const handleChange = (event) => {
         setChat(event.target.value);
+
+        if (!socket) return;
+
+        socket.emit('user_typing', ownUsername);
     }
 
     const handleSubmit = (event) => {
         event.preventDefault();
 
         if (!chat) return;
+
+        if (chat.length >= 200) {
+            alert("too many characters");
+            return null;
+        }
 
         let message = {
             username: ownUsername,
@@ -106,6 +143,11 @@ const App = () => {
             setUsers(data.connectedusers);
         });
 
+        socket.on('users_typing', (usersTyping) => {
+            setUsersTyping(usersTyping);
+
+        });
+
         socket.on('disconnect', () => {
             alert("disconnected");
         });
@@ -121,13 +163,16 @@ const App = () => {
         <div id='container'>
             <MessageBox messages={messages} />
             <SidebarOnline users={users} />
-            <form id='chat' onSubmit={handleSubmit}>
-                <input id="m" autoComplete='off' value={chat} onChange={handleChange} />
-                <button>Send</button>
-            </form>
+            <ChatBox
+                onChange={handleChange}
+                onSubmit={handleSubmit}
+                value={chat}
+                usersTyping={usersTyping}
+            />
+
         </div>
     )
-}
+};
 
 const utils = {
     getUrlParameter: function (sParam) {

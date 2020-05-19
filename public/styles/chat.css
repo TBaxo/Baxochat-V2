@@ -19,7 +19,7 @@ html, body {
 #container {
     display: grid;
     grid-template-columns: 20% 65% 15%;
-    grid-template-rows: 96% 4%;
+    grid-template-rows: 94% 6%;
     grid-template-areas: 
         "messages messages sidebar"
         "chat chat sidebar";
@@ -60,7 +60,7 @@ html, body {
 
 #chat{
     grid-area: chat;
-    background: #000;
+    background: #f7eeee;
     padding: 1px;
     bottom: 0;
     width: 100%;
