@@ -52,7 +52,16 @@ io.on('connection', (socket) => {
 
         socket.on("chat_message", (msg) => {
             if (msg.text.length >= 200) return null;
+
+            clearTimeout(users_typing[socket.id].timeout);
+            delete users_typing[socket.id];
+
+            let usernames = Object.keys(users_typing).map((key) => {
+                return users_typing[key].username;
+            });
+
             socket.broadcast.emit("chat_message", msg);
+            io.emit("users_typing", usernames);
         });
 
         socket.on('disconnect', () => {
