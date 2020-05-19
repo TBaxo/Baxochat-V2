@@ -6,6 +6,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
 const connected_users = {};
+const users_typing = {};
 
 
 app.use(express.static(__dirname + '/public'));
@@ -50,6 +51,7 @@ io.on('connection', (socket) => {
         io.emit("user_join", data);
 
         socket.on("chat_message", (msg) => {
+            if (msg.text.length >= 200) return null;
             socket.broadcast.emit("chat_message", msg);
         });
 
@@ -58,6 +60,7 @@ io.on('connection', (socket) => {
             console.log(`${disconnectedUsername} has disconnected`);
 
             delete connected_users[socket.id];
+            delete users_typing[socket.id];
 
             let data = {
                 username: disconnectedUsername,
@@ -67,9 +70,44 @@ io.on('connection', (socket) => {
 
             io.emit('user_leave', data);
         });
+
+        socket.on('user_typing', (username) => {
+            if (users_typing[socket.id] != null) {
+                clearTimeout(users_typing[socket.id].timeout);
+                users_typing[socket.id].timeout = usersTypingTimeout(socket.id, username);
+                return;
+            }
+
+            console.log(`${username} is typing`);
+
+            let data = {
+                username: username,
+                timeout: usersTypingTimeout(socket.id, username)
+            };
+
+            users_typing[socket.id] = data;
+
+            let usernames = Object.keys(users_typing).map((key) => {
+                return users_typing[key].username;
+            });
+
+            io.emit('users_typing', usernames);
+        });
     }
 });
 
+let usersTypingTimeout = (socketId, username) => {
+    return setTimeout(() => {
+        console.log(`${username} is no longer typing`);
+        delete users_typing[socketId];
+
+        let usernames = Object.keys(users_typing).map((key) => {
+            return users_typing[key].username;
+        });
+
+        io.emit('users_typing', usernames);
+    }, 5000);
+}
 http.listen(8080, () => {
     console.log('listening on port');
 });

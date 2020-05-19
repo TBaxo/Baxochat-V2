@@ -122,6 +122,28 @@ var react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/reac
 var react_dom_1 = __importDefault(__webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js"));
 var socket_io_client_1 = __importDefault(__webpack_require__(/*! socket.io-client */ "./node_modules/socket.io-client/lib/index.js"));
 var uuid_1 = __webpack_require__(/*! uuid */ "./node_modules/uuid/dist/esm-browser/index.js");
+var MessageItem = function (props) { return (react_1.default.createElement("li", null, props.message)); };
+var MessageBox = function (props) { return (react_1.default.createElement("ul", { id: 'messages' }, props.messages.map(function (message) {
+    return (react_1.default.createElement(MessageItem, { message: message, key: uuid_1.v4() }));
+}))); };
+var ChatBox = function (props) {
+    //contains div, input and button
+    var convertUsersTypingToString = function (usersTyping) {
+        if (usersTyping.length <= 0)
+            return "";
+        if (usersTyping.length === 1)
+            return usersTyping[0] + " is typing...";
+        if (usersTyping.length === 3)
+            return "Several users are typing...";
+        return usersTyping.join(' and ') + " are typing...";
+    };
+    return (react_1.default.createElement("div", { id: 'chat' },
+        react_1.default.createElement("form", { id: 'chat-form', onSubmit: props.onSubmit },
+            react_1.default.createElement("input", { id: "m", autoComplete: 'off', value: props.value, onChange: props.onChange }),
+            react_1.default.createElement("button", null, "Send")),
+        react_1.default.createElement("div", null,
+            react_1.default.createElement("span", null, convertUsersTypingToString(props.usersTyping)))));
+};
 var SidebarOnline = function (props) {
     return (react_1.default.createElement("div", { id: 'sidebar-online' },
         react_1.default.createElement("div", null,
@@ -132,18 +154,18 @@ var SidebarOnline = function (props) {
             return (react_1.default.createElement("li", { className: 'sidebar-list__item', key: user }, user));
         }))));
 };
-var MessageItem = function (props) { return (react_1.default.createElement("li", null, props.message)); };
-var MessageBox = function (props) { return (react_1.default.createElement("ul", { id: 'messages' }, props.messages.map(function (message) {
-    return (react_1.default.createElement(MessageItem, { message: message, key: uuid_1.v4() }));
-}))); };
 var App = function () {
     var _a = react_1.useState(null), socket = _a[0], setSocket = _a[1];
     var _b = react_1.useState(utils.getUrlParameter('username')), ownUsername = _b[0], setOwnUsername = _b[1];
     var _c = react_1.useState([]), messages = _c[0], setMessages = _c[1];
     var _d = react_1.useState([ownUsername]), users = _d[0], setUsers = _d[1];
     var _e = react_1.useState(""), chat = _e[0], setChat = _e[1];
+    var _f = react_1.useState([]), usersTyping = _f[0], setUsersTyping = _f[1];
     var handleChange = function (event) {
         setChat(event.target.value);
+        if (!socket)
+            return;
+        socket.emit('user_typing', ownUsername);
     };
     var handleSubmit = function (event) {
         event.preventDefault();
@@ -186,6 +208,9 @@ var App = function () {
             setMessages(function (msgs) { return msgs.concat(data.text); });
             setUsers(data.connectedusers);
         });
+        socket.on('users_typing', function (usersTyping) {
+            setUsersTyping(usersTyping);
+        });
         socket.on('disconnect', function () {
             alert("disconnected");
         });
@@ -197,9 +222,7 @@ var App = function () {
     return (react_1.default.createElement("div", { id: 'container' },
         react_1.default.createElement(MessageBox, { messages: messages }),
         react_1.default.createElement(SidebarOnline, { users: users }),
-        react_1.default.createElement("form", { id: 'chat', onSubmit: handleSubmit },
-            react_1.default.createElement("input", { id: "m", autoComplete: 'off', value: chat, onChange: handleChange }),
-            react_1.default.createElement("button", null, "Send"))));
+        react_1.default.createElement(ChatBox, { onChange: handleChange, onSubmit: handleSubmit, value: chat, usersTyping: usersTyping })));
 };
 var utils = {
     getUrlParameter: function (sParam) {
