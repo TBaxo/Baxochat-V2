@@ -48,7 +48,7 @@ export class ServerState {
         let timerIndex = this.timerIds.indexOf(user.id)
         let timer = this.timers[timerIndex];
         clearTimeout(timer);
-        this.timers[timerIndex] = SetTimer(user);
+        this.timers[timerIndex] = this.SetTimer(user);
     }
 
     private SetTimer(user: User) {

@@ -80,7 +80,7 @@ io.on('connection', (socket) => {
 });
 
 
-//IMPORTANT WORK HERE, REWRITING THE USERSTYPING FUNCTIONALITY NEE TO FINISH BEFORE NEXT BUILD
+//IMPORTANT WORK HERE, REWRITING THE USERSTYPING FUNCTIONALITY NEED TO FINISH BEFORE NEXT BUILD
 const UsersTyping = {
     ids: [],
     timeouts: [],
@@ -98,17 +98,17 @@ const UsersTyping = {
         });
 
         io.emit('users_typing', usernames);
-    });
+    };
+
+    reset: (user) => {
+        return "f";
     },
-reset: (user) => {
-    return "f";
-}
-cancel: (user) => {
+    cancel: (user) => {
 
+    }
 }
 
 
-}
 
 let usersTypingTimeout = (socketId, username) => {
     return setTimeout(() => {
