@@ -15,5 +15,12 @@
         "uuid": "^8.3.2",
         "webpack": "^4.46.0",
         "webpack-cli": "^3.3.12"
+    },
+    "scripts": {
+        "build:state": "tsc -p ./state/tsconfig.json",
+        "build:webpack": "node_modules/.bin/webpack -p --config webpack-config.js",
+        "build": "yarn run build:state && yarn run build:webpack",
+        "start": "node .",
+        "start:build": "yarn run build && node ."
     }
 }
