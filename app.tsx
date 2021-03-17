@@ -143,7 +143,7 @@ const App = () => {
             setUsers(data.connectedusers);
         });
 
-        socket.on('users_typing', (usersTyping) => {
+        socket.on('user_typing', (usersTyping) => {
             setUsersTyping(usersTyping);
 
         });

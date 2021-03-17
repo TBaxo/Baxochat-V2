@@ -1,12 +1,11 @@
 //index page
 const express = require('express');
 const bodyparser = require('body-parser');
+const { UserState } = require("./state/UserState");
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-
-const connected_users = {};
-const users_typing = {};
+const state = new UserState();
 
 
 app.use(express.static(__dirname + '/public'));
@@ -21,7 +20,7 @@ app.get('/', (req, res) => {
 app.post('/', function (req, res) {
     let username = req.body.username;
 
-    if (Object.values(connected_users).includes(username)) {
+    if (state.GetUserExists(username)) {
         res.sendFile(__dirname + '/index.html');
     }
 
@@ -38,14 +37,14 @@ io.on('connection', (socket) => {
     let username = socket.handshake.query.username;
     console.log(`${username} has connected`);
 
-    if (!connected_users[socket.id]) {
+    if (state.GetUserExistsBySocketId(socket.id)) {
 
-        connected_users[socket.id] = username;
+        let newUser = state.CreateUser(username, socket.id);
 
         let data = {
-            username: username,
-            text: `${username} has joined the chat`,
-            connectedusers: Object.values(connected_users)
+            username: user.username,
+            text: `${user.username} has joined the chat`,
+            connectedusers: state.GetAllUsernames()
         };
 
         io.emit("user_join", data);
@@ -53,57 +52,63 @@ io.on('connection', (socket) => {
         socket.on("chat_message", (msg) => {
             if (msg.text.length >= 200) return null;
 
-            clearTimeout(users_typing[socket.id].timeout);
-            delete users_typing[socket.id];
-
-            let usernames = Object.keys(users_typing).map((key) => {
-                return users_typing[key].username;
-            });
-
             socket.broadcast.emit("chat_message", msg);
-            io.emit("users_typing", usernames);
+            io.emit("users_finished_typing", msg.username);
         });
 
         socket.on('disconnect', () => {
-            let disconnectedUsername = connected_users[socket.id];
+            let disconnectedUsername = state.GetUser(socket.id).username;
             console.log(`${disconnectedUsername} has disconnected`);
 
-            delete connected_users[socket.id];
-            delete users_typing[socket.id];
 
             let data = {
                 username: disconnectedUsername,
                 text: `${disconnectedUsername} has left the chat`,
-                connectedusers: Object.values(connected_users)
+                connectedusers: state.GetAllUsernames()
             };
 
             io.emit('user_leave', data);
         });
 
         socket.on('user_typing', (username) => {
-            if (users_typing[socket.id] != null) {
-                clearTimeout(users_typing[socket.id].timeout);
-                users_typing[socket.id].timeout = usersTypingTimeout(socket.id, username);
-                return;
-            }
 
             console.log(`${username} is typing`);
 
-            let data = {
-                username: username,
-                timeout: usersTypingTimeout(socket.id, username)
-            };
-
-            users_typing[socket.id] = data;
-
-            let usernames = Object.keys(users_typing).map((key) => {
-                return users_typing[key].username;
-            });
-
-            io.emit('users_typing', usernames);
+            io.emit('user_typing', username);
         });
     }
 });
+
+
+//IMPORTANT WORK HERE, REWRITING THE USERSTYPING FUNCTIONALITY NEE TO FINISH BEFORE NEXT BUILD
+const UsersTyping = {
+    ids: [],
+    timeouts: [],
+    set: (user) => {
+        user.isTyping = true;
+        ids.push(user.id);
+        console.log(`${username} is typing`);
+
+        let timeout = setTimeout(() => {
+            console.log(`${user.username} is no longer typing`);
+            delete this.ids[user.id];
+            delete this.timeouts[]
+
+            let usersTyping = state.GetUsersTyping();
+        });
+
+        io.emit('users_typing', usernames);
+    });
+    },
+reset: (user) => {
+    return "f";
+}
+cancel: (user) => {
+
+}
+
+
+}
 
 let usersTypingTimeout = (socketId, username) => {
     return setTimeout(() => {
@@ -117,6 +122,8 @@ let usersTypingTimeout = (socketId, username) => {
         io.emit('users_typing', usernames);
     }, 5000);
 }
+
+
 http.listen(8080, () => {
     console.log('listening on port');
 });
