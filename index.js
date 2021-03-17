@@ -1,11 +1,12 @@
 //index page
 const express = require('express');
 const bodyparser = require('body-parser');
-const { UserState } = require("./state/UserState");
+const { ServerState } = require("./state/ServerState")
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-const state = new UserState();
+
+const state = new ServerState(io);
 
 
 app.use(express.static(__dirname + '/public'));
@@ -19,9 +20,13 @@ app.get('/', (req, res) => {
 
 app.post('/', function (req, res) {
     let username = req.body.username;
+    let userState = state.GetUserState();
 
-    if (state.GetUserExists(username)) {
+    let result = userState.GetUserExistsByUsername(username);
+
+    if (userState.GetUserExistsByUsername(username)) {
         res.sendFile(__dirname + '/index.html');
+        return;
     }
 
     let endpoint = `/chat?username=${username}`;
@@ -37,14 +42,16 @@ io.on('connection', (socket) => {
     let username = socket.handshake.query.username;
     console.log(`${username} has connected`);
 
-    if (state.GetUserExistsBySocketId(socket.id)) {
+    let userState = state.GetUserState();
 
-        let newUser = state.CreateUser(username, socket.id);
+    if (!userState.GetUserExistsByUsername(username)) {
+
+        let newUser = userState.CreateUser(username, socket);
 
         let data = {
-            username: user.username,
-            text: `${user.username} has joined the chat`,
-            connectedusers: state.GetAllUsernames()
+            username: newUser.username,
+            text: `${newUser.username} has joined the chat`,
+            connectedusers: userState.GetAllUsernames()
         };
 
         io.emit("user_join", data);
@@ -57,14 +64,17 @@ io.on('connection', (socket) => {
         });
 
         socket.on('disconnect', () => {
-            let disconnectedUsername = state.GetUser(socket.id).username;
-            console.log(`${disconnectedUsername} has disconnected`);
+            let userState = state.GetUserState();
 
+            let disconnectedUser = userState.GetUser(socket.id);
+            console.log(`${disconnectedUser.username} has disconnected`);
+
+            userState.RemoveUserBySocketId(socket.id);
 
             let data = {
-                username: disconnectedUsername,
-                text: `${disconnectedUsername} has left the chat`,
-                connectedusers: state.GetAllUsernames()
+                username: disconnectedUser.username,
+                text: `${disconnectedUser.username} has left the chat`,
+                connectedusers: userState.GetAllUsernames()
             };
 
             io.emit('user_leave', data);
@@ -72,56 +82,22 @@ io.on('connection', (socket) => {
 
         socket.on('user_typing', (username) => {
 
+            let userState = state.GetUserState();
+
+            let user = userState.GetUserByUserName(username);
+
+            state.SetIsUserTyping(user);
+
             console.log(`${username} is typing`);
 
-            io.emit('user_typing', username);
+            let users_typing = state.GetUsersTyping();
+
+            let users_typing_usernames = users_typing.map(user => { return user.username });
+
+            io.emit('users_typing', users_typing_usernames);
         });
     }
 });
-
-
-//IMPORTANT WORK HERE, REWRITING THE USERSTYPING FUNCTIONALITY NEED TO FINISH BEFORE NEXT BUILD
-const UsersTyping = {
-    ids: [],
-    timeouts: [],
-    set: (user) => {
-        user.isTyping = true;
-        ids.push(user.id);
-        console.log(`${username} is typing`);
-
-        let timeout = setTimeout(() => {
-            console.log(`${user.username} is no longer typing`);
-            delete this.ids[user.id];
-            delete this.timeouts[]
-
-            let usersTyping = state.GetUsersTyping();
-        });
-
-        io.emit('users_typing', usernames);
-    };
-
-    reset: (user) => {
-        return "f";
-    },
-    cancel: (user) => {
-
-    }
-}
-
-
-
-let usersTypingTimeout = (socketId, username) => {
-    return setTimeout(() => {
-        console.log(`${username} is no longer typing`);
-        delete users_typing[socketId];
-
-        let usernames = Object.keys(users_typing).map((key) => {
-            return users_typing[key].username;
-        });
-
-        io.emit('users_typing', usernames);
-    }, 5000);
-}
 
 
 http.listen(8080, () => {

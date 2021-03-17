@@ -16,8 +16,16 @@ export class UserState {
         return this.users[this.ids.indexOf(id)];
     }
 
+    public GetUserByUserName(username: string): User {
+        let user = this.users.filter((user) => {
+            return user.username === username;
+        })[0];
+
+        return user;
+    }
+
     public GetAllUsers(): Array<User> {
-        return JSON.parse(JSON.stringify(this.users));
+        return this.users;
     }
 
     public GetUsers(ids: Array<string>): Array<User> {
@@ -68,7 +76,7 @@ export class UserState {
             return user.username === username;
         })[0];
 
-        return (user !== null || user !== undefined);
+        return (user != null)
     }
 
     public GetUserExistsBySocketId(socketId: string): boolean {

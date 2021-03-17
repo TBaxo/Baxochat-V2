@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserState = void 0;
 //create a user state object.
 var User_1 = require("./User");
@@ -16,8 +16,14 @@ var UserState = /** @class */ (function () {
     UserState.prototype.GetUser = function (id) {
         return this.users[this.ids.indexOf(id)];
     };
+    UserState.prototype.GetUserByUserName = function (username) {
+        var user = this.users.filter(function (user) {
+            return user.username === username;
+        })[0];
+        return user;
+    };
     UserState.prototype.GetAllUsers = function () {
-        return JSON.parse(JSON.stringify(this.users));
+        return this.users;
     };
     UserState.prototype.GetUsers = function (ids) {
         var _this = this;
@@ -28,6 +34,9 @@ var UserState = /** @class */ (function () {
         return indexes.map(function (index) {
             return _this.users[index];
         });
+    };
+    UserState.prototype.GetAllUsernames = function () {
+        return this.users.map(function (user) { return user.username; });
     };
     UserState.prototype.CreateUser = function (username, socket) {
         var user = new User_1.User(username, socket);
@@ -54,16 +63,12 @@ var UserState = /** @class */ (function () {
         var user = this.users.filter(function (user) {
             return user.username === username;
         })[0];
-        return (user !== null || user !== undefined);
+        return (user != null);
     };
     UserState.prototype.GetUserExistsBySocketId = function (socketId) {
         return this.ids.indexOf(socketId) !== -1;
     };
-    UserState.prototype.GetUsersTyping = function () {
-        return this.users.filter(function (user) {
-            return user.isTyping;
-        });
-    };
     return UserState;
 }());
 exports.UserState = UserState;
+//# sourceMappingURL=UserState.js.map

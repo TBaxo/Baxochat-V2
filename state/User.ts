@@ -11,10 +11,6 @@ export class User {
         this.socket = socket;
     }
 
-
-
-
-    //
     public toString = (): string => {
         return `Id: ${this.id} \r\nUsername: ${this.username} \r\n`;
     };

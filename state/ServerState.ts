@@ -4,12 +4,14 @@ import { UserState } from "./UserState";
 const TIMER_LENGTH: number = 5000;
 
 export class ServerState {
+    private socket: any;
     private userState: UserState;
 
     private timerIds: Array<string>;
     private timers: Array<any>;
 
-    constructor() {
+    constructor(socket: any) {
+        this.socket = socket;
         this.userState = new UserState();
 
         this.timerIds = [];
@@ -20,19 +22,19 @@ export class ServerState {
         return this.userState;
     }
 
-    public UserIsTyping(user: User): boolean {
+    public IsUserTyping(user: User): boolean {
         return this.timerIds.indexOf(user.id) !== -1;
     }
 
     public GetUsersTyping(): Array<User> {
         let users = this.userState.GetAllUsers();
         return users.filter(user => {
-            return this.UserIsTyping(user);
+            return this.IsUserTyping(user);
         });
     }
 
-    public SetUserIsTyping(user: User) {
-        if (this.UserIsTyping(user)) {
+    public SetIsUserTyping(user: User) {
+        if (this.IsUserTyping(user)) {
             this.ResetTimer(user);
             return false;
         }
@@ -53,18 +55,29 @@ export class ServerState {
 
     private SetTimer(user: User) {
         return setTimeout(() => {
-            console.log(`${username} is no longer typing`);
-            delete users_typing[socketId];
+            console.log(`${user.username} is no longer typing`);
 
-            let usernames = Object.keys(users_typing).map((key) => {
-                return users_typing[key].username;
+            let timerIndex = this.timerIds.indexOf(user.id)
+            let timer = this.timers[timerIndex];
+            clearTimeout(timer);
+
+            delete this.timerIds[timerIndex];
+            delete this.timers[timerIndex];
+
+            let usernames = this.GetUsersTyping().map((user) => {
+                return user.username;
             });
 
-            .emit('users_typing', usernames);
+            this.socket.emit('users_typing', usernames);
         }, TIMER_LENGTH)
     }
 
     private RemoveTimer(user: User) {
+        let timerIndex = this.timerIds.indexOf(user.id)
+        let timer = this.timers[timerIndex];
+        clearTimeout(timer);
 
+        delete this.timerIds[timerIndex];
+        delete this.timers[timerIndex];
     }
 }
