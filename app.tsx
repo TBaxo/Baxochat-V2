@@ -2,7 +2,7 @@ declare var require: any
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import client from "socket.io-client";
+import { io } from "socket.io-client";
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -114,7 +114,7 @@ const App = () => {
     };
 
     useEffect(() => {
-        setSocket(client(window.location.origin, { query: `username=${ownUsername}` }));
+        setSocket(io(window.location.origin, { query: { username: `${ownUsername}` } }));
     }, []);
 
     useEffect(() => {
