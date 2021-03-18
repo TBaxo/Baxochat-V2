@@ -6,8 +6,8 @@ export class ServerClient {
     private io: Socket;
     private state: ServerState;
 
-    constructor(io2: Socket, serverState: ServerState) {
-        this.io = io2;
+    constructor(io: Socket, serverState: ServerState) {
+        this.io = io;
         this.state = serverState;
 
         this.setupClient();
