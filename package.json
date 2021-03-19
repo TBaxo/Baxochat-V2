@@ -19,9 +19,9 @@
         "webpack-cli": "^3.3.12"
     },
     "scripts": {
-        "build:server": "tsc -p ./server/tsconfig.json",
+        "build:tsc": "tsc",
         "build:webpack": "node_modules/.bin/webpack -p --config webpack-config.js",
-        "build": "yarn run build:server && yarn run build:webpack",
+        "build": "yarn run build:tsc && yarn run build:webpack",
         "start": "node .",
         "start:build": "yarn run build && node ."
     }

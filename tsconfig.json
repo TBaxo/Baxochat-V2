@@ -10,9 +10,13 @@
         "jsx": "react"
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "app",
+        "dist",
+        "public"
     ],
-    "files": [
-        "./app/app.tsx"
+    "include": [
+        "server/**/*",
+        "shared/**/*",
     ]
 }
