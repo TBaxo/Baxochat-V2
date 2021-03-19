@@ -1,16 +1,35 @@
-import { ServerState } from "../state/ServerState"
-import { Socket } from "socket.io"
+import { UserRepository } from "../repository/Users/UserRepository"
+import { ChatHistoryRepository } from "../repository/ChatHistory/ChatHistoryRepository"
+import { Message } from "../../shared/Models/Message/Message";
+import { ServerState } from "../state/ServerState";
+
+import { Socket } from "socket.io";
+import { MongoClient } from "mongodb";
+import { v4 as uuidv4 } from 'uuid';
+
+
 
 export class ServerClient {
 
     private io: Socket;
     private state: ServerState;
 
+
+    private userrepository: UserRepository;
+    private chathistoryrepository: ChatHistoryRepository;
+
     constructor(io: Socket, serverState: ServerState) {
         this.io = io;
         this.state = serverState;
-
         this.setupClient();
+
+        MongoClient.connect('mongodb://localhost:27017')
+            .then((result: MongoClient) => {
+                const db = result.db('Baxochat');
+
+                this.userrepository = new UserRepository(db);
+                this.chathistoryrepository = new ChatHistoryRepository(db)
+            });
     }
 
 
@@ -45,6 +64,16 @@ export class ServerClient {
         //receive message
         socket.on("chat_message", (msg) => {
             if (msg.text.length >= 200) return null;
+
+            let messageId: string = uuidv4();
+            var newMessage = new Message(
+                messageId,
+                socket.id,
+                msg.text,
+                new Date()
+            );
+
+            this.chathistoryrepository.create(newMessage);
 
             socket.broadcast.emit("chat_message", msg);
             this.io.emit("users_finished_typing", msg.username);

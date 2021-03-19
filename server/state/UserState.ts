@@ -1,5 +1,5 @@
 //create a user state object.
-import { User } from "./User";
+import { User } from "../../shared/Models/User/User";
 //contains multiple users
 
 

@@ -1,4 +1,4 @@
-import { User } from "./User";
+import { User } from "../../shared/Models/User/User";
 import { UserState } from "./UserState";
 
 const TIMER_LENGTH: number = 5000;

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserState = void 0;
 //create a user state object.
-var User_1 = require("./User");
+var User_1 = require("../../shared/Models/User/User");
 //contains multiple users
 var UserState = /** @class */ (function () {
     function UserState() {

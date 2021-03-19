@@ -1,11 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServerClient = void 0;
+var UserRepository_1 = require("../repository/Users/UserRepository");
+var ChatHistoryRepository_1 = require("../repository/ChatHistory/ChatHistoryRepository");
+var Message_1 = require("../../shared/Models/Message/Message");
+var mongodb_1 = require("mongodb");
+var uuid_1 = require("uuid");
 var ServerClient = /** @class */ (function () {
-    function ServerClient(io2, serverState) {
-        this.io = io2;
+    function ServerClient(io, serverState) {
+        var _this = this;
+        this.io = io;
         this.state = serverState;
         this.setupClient();
+        mongodb_1.MongoClient.connect('mongodb://localhost:27017')
+            .then(function (result) {
+            var db = result.db('Baxochat');
+            _this.userrepository = new UserRepository_1.UserRepository(db);
+            _this.chathistoryrepository = new ChatHistoryRepository_1.ChatHistoryRepository(db);
+        });
     }
     ServerClient.prototype.setupClient = function () {
         var _this = this;
@@ -31,6 +43,9 @@ var ServerClient = /** @class */ (function () {
         socket.on("chat_message", function (msg) {
             if (msg.text.length >= 200)
                 return null;
+            var messageId = uuid_1.v4();
+            var newMessage = new Message_1.Message(messageId, socket.id, msg.text, new Date());
+            _this.chathistoryrepository.create(newMessage);
             socket.broadcast.emit("chat_message", msg);
             _this.io.emit("users_finished_typing", msg.username);
         });

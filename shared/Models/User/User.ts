@@ -1,8 +1,8 @@
 export class User {
-    //persistent
-    id: string;
-    username: string;
-    socket: any;
+
+    public id: string;
+    public username: string;
+    public socket: any;
 
 
     constructor(username: string, socket: any) {
