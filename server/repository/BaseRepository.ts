@@ -1,18 +1,18 @@
 import { IBaseRepository } from "./IBaseRepository"
-import { Db, Collection, InsertOneWriteOpResult, UpdateWriteOpResult, DeleteWriteOpResultObject } from 'mongodb';
+import { Db, Collection, InsertOneWriteOpResult, UpdateWriteOpResult, DeleteWriteOpResultObject, ObjectId } from 'mongodb';
 
-export abstract class BaseRepository<T> implements IBaseRepository<T> {
+export abstract class BaseRepository<T extends { _id: ObjectId }> implements IBaseRepository<T> {
 
-    private readonly collection: Collection
+    protected readonly collection: Collection
 
     constructor(db: Db, collectionname: string) {
         this.collection = db.collection(collectionname);
     }
 
-    async create(item: T): Promise<Boolean> {
-        const result: InsertOneWriteOpResult<any> = await this.collection.insertOne(item);
+    async create(item: T): Promise<ObjectId> {
+        const result: InsertOneWriteOpResult<T> = await this.collection.insertOne(item);
 
-        return !result.result.ok;
+        return result.insertedId;
     }
     async update(item: T): Promise<Boolean> {
         const result: UpdateWriteOpResult = await this.collection.updateOne({}, item);
@@ -24,8 +24,8 @@ export abstract class BaseRepository<T> implements IBaseRepository<T> {
 
         return !result.result.ok;
     }
-    async read(id: string): Promise<T> {
-        const result: Promise<T> = this.collection.findOne({});
+    async read(id: ObjectId): Promise<T> {
+        const result: Promise<T> = this.collection.findOne({ _id: id });
 
         return result;
     }

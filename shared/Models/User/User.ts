@@ -1,18 +1,18 @@
+import { ObjectId } from "bson";
+
 export class User {
 
-    public id: string;
+    public _id: ObjectId;
     public username: string;
-    public socket: any;
 
 
-    constructor(username: string, socket: any) {
-        this.id = socket.id;
+
+    constructor(username: string) {
         this.username = username;
-        this.socket = socket;
     }
 
     public toString = (): string => {
-        return `Id: ${this.id} \r\nUsername: ${this.username} \r\n`;
+        return `Id: ${this._id} \r\nUsername: ${this.username} \r\n`;
     };
 }
 

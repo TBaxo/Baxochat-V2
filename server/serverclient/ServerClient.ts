@@ -2,7 +2,6 @@ import { UserRepository } from "../repository/Users/UserRepository"
 import { ChatHistoryRepository } from "../repository/ChatHistory/ChatHistoryRepository"
 import { Message } from "../../shared/Models/Message/Message";
 import { ServerState } from "../state/ServerState";
-
 import { Socket } from "socket.io";
 import { MongoClient } from "mongodb";
 import { v4 as uuidv4 } from 'uuid';
@@ -23,6 +22,7 @@ export class ServerClient {
         this.state = serverState;
         this.setupClient();
 
+
         MongoClient.connect('mongodb://localhost:27017')
             .then((result: MongoClient) => {
                 const db = result.db('Baxochat');
@@ -36,6 +36,8 @@ export class ServerClient {
     private setupClient() {
         this.io.on('connection', (socket: Socket) => {
             let username = socket.handshake.query.username.toString();
+
+
             console.log(`${username} has connected`);
 
             let userState = this.state.GetUserState();
@@ -62,18 +64,22 @@ export class ServerClient {
     private setupSocketEventHandlers(socket: Socket) {
 
         //receive message
-        socket.on("chat_message", (msg) => {
+        socket.on("chat_message", async (msg) => {
             if (msg.text.length >= 200) return null;
 
             let messageId: string = uuidv4();
             var newMessage = new Message(
-                messageId,
                 socket.id,
                 msg.text,
                 new Date()
             );
 
-            this.chathistoryrepository.create(newMessage);
+            var id = await this.chathistoryrepository.create(newMessage);
+
+            //TEST CODE
+            this.chathistoryrepository.read(id);
+
+
 
             socket.broadcast.emit("chat_message", msg);
             this.io.emit("users_finished_typing", msg.username);

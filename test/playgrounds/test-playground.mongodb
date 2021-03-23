@@ -12,9 +12,9 @@ db.chathistory.drop();
 
 // Insert a few documents into the sales collection.
 db.chathistory.insertMany([
-  { '_id': 'test1', 'userid': 'test1', 'text': 'Based', 'dateCreated': new Date('2014-03-01T08:00:00Z') },
-  { '_id': 'test2', 'userid': 'test2', 'text': 'Double Based', 'dateCreated': new Date('2014-03-01T09:00:00Z') },
-  { '_id': 'test3', 'userid': 'test3', 'text': 'Triple Based!', 'dateCreated': new Date('2014-03-15T09:00:00Z') },
+  { 'id': 'test1', 'userid': 'test1', 'text': 'Based', 'dateCreated': new Date('2014-03-01T08:00:00Z') },
+  { 'id': 'test2', 'userid': 'test2', 'text': 'Double Based', 'dateCreated': new Date('2014-03-01T09:00:00Z') },
+  { 'id': 'test3', 'userid': 'test3', 'text': 'Triple Based!', 'dateCreated': new Date('2014-03-15T09:00:00Z') },
 ]);
 
 // Run a find command to view items sold on April 4th, 2014.
