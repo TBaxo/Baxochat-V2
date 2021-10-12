@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { io } from "socket.io-client";
 import { v4 as uuidv4 } from 'uuid';
+import { Message } from "../shared/Models/Message/Message";
+import { User } from "../shared/Models/User/User";
 
 
 const MessageItem = (props) => (
@@ -72,8 +74,8 @@ const SidebarOnline = (props) => {
 
 const App = () => {
 
-    const [socket, setSocket] = useState(null);
-    const [ownUsername, setOwnUsername] = useState(utils.getUrlParameter('username'));
+    const [socket, setSocket] = React.useState(null);
+    const [ownUsername, setOwnUsername] = React.useState(utils.getUrlParameter('username'));
     const [messages, setMessages] = useState([]);
     const [users, setUsers] = useState([ownUsername]);
     const [chat, setChat] = useState("");
@@ -131,7 +133,7 @@ const App = () => {
 
         socket.on('user_join', (data) => {
             setUsers(data.connectedusers);
-
+            debugger;
             if (data.username === ownUsername) return;
 
             setMessages(msgs => msgs.concat(data.text));
@@ -145,8 +147,13 @@ const App = () => {
 
         socket.on('users_typing', (usersTyping) => {
             setUsersTyping(usersTyping);
-
         });
+
+        socket.on('load_chat', (previousMessages: Message[]) => {
+            let previousMessagesText = previousMessages.map(message => `${message.username}: ${message.text}`)
+
+            setMessages(msgs => previousMessages.concat(msgs));
+        })
 
         socket.on('disconnect', () => {
             alert("disconnected");
