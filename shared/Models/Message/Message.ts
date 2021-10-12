@@ -2,13 +2,13 @@ import { ObjectId } from "bson";
 
 export class Message {
     public _id: ObjectId;
-    public userid: string;
+    public username: string;
     public text: string;
     public datecreated: Date;
 
 
-    constructor(userid: string, text: string, datecreated: Date) {
-        this.userid = userid;
+    constructor(username: string, text: string, datecreated: Date) {
+        this.username = username;
         this.text = text;
         this.datecreated = datecreated;
     }

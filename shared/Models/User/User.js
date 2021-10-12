@@ -2,14 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 var User = /** @class */ (function () {
-    function User(username, socket) {
+    function User(username) {
         var _this = this;
         this.toString = function () {
-            return "Id: " + _this.id + " \r\nUsername: " + _this.username + " \r\n";
+            return "Id: " + _this._id + " \r\nUsername: " + _this.username + " \r\n";
         };
-        this.id = socket.id;
         this.username = username;
-        this.socket = socket;
     }
     return User;
 }());
