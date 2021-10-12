@@ -75,9 +75,9 @@ const SidebarOnline = (props) => {
 const App = () => {
 
     const [socket, setSocket] = React.useState(null);
-    const [ownUsername, setOwnUsername] = React.useState(utils.getUrlParameter('username'));
-    const [messages, setMessages] = useState([]);
-    const [users, setUsers] = useState([ownUsername]);
+    const [ownUsername, setOwnUsername] = useState<string>(utils.getUrlParameter('username'));
+    const [messages, setMessages] = useState<string[]>([]);
+    const [users, setUsers] = useState<string[]>([ownUsername]);
     const [chat, setChat] = useState("");
     const [usersTyping, setUsersTyping] = useState([]);
 
@@ -133,7 +133,6 @@ const App = () => {
 
         socket.on('user_join', (data) => {
             setUsers(data.connectedusers);
-            debugger;
             if (data.username === ownUsername) return;
 
             setMessages(msgs => msgs.concat(data.text));
@@ -152,7 +151,7 @@ const App = () => {
         socket.on('load_chat', (previousMessages: Message[]) => {
             let previousMessagesText = previousMessages.map(message => `${message.username}: ${message.text}`)
 
-            setMessages(msgs => previousMessages.concat(msgs));
+            setMessages(msgs => previousMessagesText.concat(msgs));
         })
 
         socket.on('disconnect', () => {
@@ -182,7 +181,7 @@ const App = () => {
 };
 
 const utils = {
-    getUrlParameter: function (sParam) {
+    getUrlParameter: function (sParam): string {
         var sPageURL = window.location.search.substring(1),
             sURLVariables = sPageURL.split('&'),
             sParameterName,
@@ -192,7 +191,7 @@ const utils = {
             sParameterName = sURLVariables[i].split('=');
 
             if (sParameterName[0] === sParam) {
-                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                return sParameterName[1] === undefined ? "" : decodeURIComponent(sParameterName[1]);
             }
         }
     }
