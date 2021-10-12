@@ -49,7 +49,7 @@ var BaseRepository = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.collection.insertOne(item)];
                     case 1:
                         result = _a.sent();
-                        return [2 /*return*/, !result.result.ok];
+                        return [2 /*return*/, result.insertedId];
                 }
             });
         });
@@ -84,7 +84,7 @@ var BaseRepository = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var result;
             return __generator(this, function (_a) {
-                result = this.collection.findOne({});
+                result = this.collection.findOne({ _id: id });
                 return [2 /*return*/, result];
             });
         });

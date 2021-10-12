@@ -20,7 +20,7 @@ export class UserRepository extends BaseRepository<User> implements IUserReposit
     public async readAllUsernames(): Promise<string[]> {
         const projection = { _id: 0, username: 1 };
 
-        const result = await this.collection.find({}).project(projection).toArray();
+        const result = (await this.collection.find({}).project(projection).toArray()).map((user) => user.username);
 
         return result;
     }
