@@ -4,6 +4,7 @@ import { Socket } from "socket.io";
 const TIMER_LENGTH: number = 5000;
 
 export class ServerState {
+    /*
     private socket: Socket;
 
     private timerIds: Array<string>;
@@ -18,7 +19,7 @@ export class ServerState {
 
 
     public IsUserTyping(user: User): boolean {
-        return this.timerIds.indexOf(user.socket.) !== -1;
+        return this.timerIds.indexOf(user.socket) !== -1;
     }
 
     public GetUsersTyping(): Array<User> {
@@ -75,4 +76,5 @@ export class ServerState {
         delete this.timerIds[timerIndex];
         delete this.timers[timerIndex];
     }
+    */
 }

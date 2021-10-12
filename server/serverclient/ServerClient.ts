@@ -5,6 +5,7 @@ import { ServerState } from "../state/ServerState";
 import { Socket } from "socket.io";
 import { MongoClient } from "mongodb";
 import { v4 as uuidv4 } from 'uuid';
+import { User } from "../../shared/Models/User/User";
 
 
 
@@ -12,7 +13,6 @@ export class ServerClient {
 
     private io: Socket;
     private state: ServerState;
-
 
     private userrepository: UserRepository;
     private chathistoryrepository: ChatHistoryRepository;
@@ -32,30 +32,43 @@ export class ServerClient {
             });
     }
 
+    public async CheckUserExists(username): Promise<Boolean> {
+        return await this.userrepository.readIsUsernameInUse(username);
+    }
+
 
     private setupClient() {
-        this.io.on('connection', (socket: Socket) => {
+        this.io.on('connection', async (socket: Socket) => {
             let username = socket.handshake.query.username.toString();
 
 
             console.log(`${username} has connected`);
 
-            let userState = this.state.GetUserState();
+            let usernameAlreadyExists = await this.userrepository.readIsUsernameInUse(username)
 
-            if (!userState.GetUserExistsByUsername(username)) {
-
-                let newUser = userState.CreateUser(username, socket);
-
-                let data = {
-                    username: newUser.username,
-                    text: `${newUser.username} has joined the chat`,
-                    connectedusers: userState.GetAllUsernames()
-                };
-
-                this.io.emit("user_join", data);
-
-                this.setupSocketEventHandlers(socket);
+            if (usernameAlreadyExists) {
+                return;
             }
+
+            let user = new User(username);
+
+            let userId = await this.userrepository.create(user);
+
+            let connectedUsers = await this.userrepository.readAllUsernames();
+
+            let data = {
+                username: user.username,
+                text: `${user.username} has joined the chat`,
+                connectedusers: connectedUsers
+            };
+
+            this.io.emit("user_join", data);
+
+            var messages = await this.chathistoryrepository.readAll();
+
+            socket.emit("load_chat", messages)
+
+            this.setupSocketEventHandlers(socket);
         });
     }
 
@@ -79,26 +92,25 @@ export class ServerClient {
             //TEST CODE
             this.chathistoryrepository.read(id);
 
-
-
             socket.broadcast.emit("chat_message", msg);
             this.io.emit("users_finished_typing", msg.username);
         });
 
 
         //user disconnected
-        socket.on('disconnect', () => {
-            let userState = this.state.GetUserState();
+        socket.on('disconnect', async () => {
 
-            let disconnectedUser = userState.GetUser(socket.id);
-            console.log(`${disconnectedUser.username} has disconnected`);
+            let username = socket.handshake.query.username.toString();
+            console.log(`${username} has disconnected`);
 
-            userState.RemoveUserBySocketId(socket.id);
+            let user = await this.userrepository.readUserByUsername(username);
+
+            await this.userrepository.delete(user);
 
             let data = {
-                username: disconnectedUser.username,
-                text: `${disconnectedUser.username} has left the chat`,
-                connectedusers: userState.GetAllUsernames()
+                username: username,
+                text: `${username} has left the chat`,
+                connectedusers: await this.userrepository.readAll()
             };
 
             this.io.emit('user_leave', data);
@@ -106,21 +118,21 @@ export class ServerClient {
 
 
         //user is typing
-        socket.on('user_typing', (username) => {
+        socket.on('user_typing', async (username) => {
+            /*
+                        let user = await this.userrepository.readUserByUsername(username);
+            
+                        this.state.SetIsUserTyping(user);
+            
+                        console.log(`${username} is typing`);
+            
+                        let users_typing = this.state.GetUsersTyping();
+            
+                        let users_typing_usernames = users_typing.map(user => { return user.username });
+            
+                        this.io.emit('users_typing', users_typing_usernames);
 
-            let userState = this.state.GetUserState();
-
-            let user = userState.GetUserByUserName(username);
-
-            this.state.SetIsUserTyping(user);
-
-            console.log(`${username} is typing`);
-
-            let users_typing = this.state.GetUsersTyping();
-
-            let users_typing_usernames = users_typing.map(user => { return user.username });
-
-            this.io.emit('users_typing', users_typing_usernames);
+            */
         });
     }
 }
