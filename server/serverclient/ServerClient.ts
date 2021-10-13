@@ -82,7 +82,7 @@ export class ServerClient {
 
             let messageId: string = uuidv4();
             var newMessage = new Message(
-                socket.id,
+                msg.username,
                 msg.text,
                 new Date()
             );
@@ -110,7 +110,7 @@ export class ServerClient {
             let data = {
                 username: username,
                 text: `${username} has left the chat`,
-                connectedusers: await this.userrepository.readAll()
+                connectedusers: await this.userrepository.readAllUsernames()
             };
 
             this.io.emit('user_leave', data);

@@ -114,8 +114,8 @@ var ServerClient = /** @class */ (function () {
                     case 0:
                         if (msg.text.length >= 200)
                             return [2 /*return*/, null];
-                        messageId = uuid_1.v4();
-                        newMessage = new Message_1.Message(socket.id, msg.text, new Date());
+                        messageId = (0, uuid_1.v4)();
+                        newMessage = new Message_1.Message(msg.username, msg.text, new Date());
                         return [4 /*yield*/, this.chathistoryrepository.create(newMessage)];
                     case 1:
                         id = _a.sent();
@@ -129,7 +129,8 @@ var ServerClient = /** @class */ (function () {
         }); });
         //user disconnected
         socket.on('disconnect', function () { return __awaiter(_this, void 0, void 0, function () {
-            var username, user, data, _a;
+            var username, user, data;
+            var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -145,7 +146,7 @@ var ServerClient = /** @class */ (function () {
                             username: username,
                             text: username + " has left the chat"
                         };
-                        return [4 /*yield*/, this.userrepository.readAll()];
+                        return [4 /*yield*/, this.userrepository.readAllUsernames()];
                     case 3:
                         data = (_a.connectedusers = _b.sent(),
                             _a);
