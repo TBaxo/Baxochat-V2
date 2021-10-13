@@ -21,13 +21,10 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-app.post('/', function (req, res) {
+app.post('/', async function (req, res) {
     let username = req.body.username;
-    let userState = state.GetUserState();
 
-    let result = userState.GetUserExistsByUsername(username);
-
-    if (userState.GetUserExistsByUsername(username)) {
+    if (await client.CheckUserExists(username)) {
         res.sendFile(__dirname + '/index.html');
         return;
     }

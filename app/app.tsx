@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { io } from "socket.io-client";
 import { v4 as uuidv4 } from 'uuid';
+import { Message } from "../shared/Models/Message/Message";
+import { User } from "../shared/Models/User/User";
 
 
 const MessageItem = (props) => (
@@ -72,10 +74,10 @@ const SidebarOnline = (props) => {
 
 const App = () => {
 
-    const [socket, setSocket] = useState(null);
-    const [ownUsername, setOwnUsername] = useState(utils.getUrlParameter('username'));
-    const [messages, setMessages] = useState([]);
-    const [users, setUsers] = useState([ownUsername]);
+    const [socket, setSocket] = React.useState(null);
+    const [ownUsername, setOwnUsername] = useState<string>(utils.getUrlParameter('username'));
+    const [messages, setMessages] = useState<string[]>([]);
+    const [users, setUsers] = useState<string[]>([ownUsername]);
     const [chat, setChat] = useState("");
     const [usersTyping, setUsersTyping] = useState([]);
 
@@ -131,7 +133,6 @@ const App = () => {
 
         socket.on('user_join', (data) => {
             setUsers(data.connectedusers);
-
             if (data.username === ownUsername) return;
 
             setMessages(msgs => msgs.concat(data.text));
@@ -145,8 +146,13 @@ const App = () => {
 
         socket.on('users_typing', (usersTyping) => {
             setUsersTyping(usersTyping);
-
         });
+
+        socket.on('load_chat', (previousMessages: Message[]) => {
+            let previousMessagesText = previousMessages.map(message => `${message.username}: ${message.text}`)
+
+            setMessages(msgs => previousMessagesText.concat(msgs));
+        })
 
         socket.on('disconnect', () => {
             alert("disconnected");
@@ -175,7 +181,7 @@ const App = () => {
 };
 
 const utils = {
-    getUrlParameter: function (sParam) {
+    getUrlParameter: function (sParam): string {
         var sPageURL = window.location.search.substring(1),
             sURLVariables = sPageURL.split('&'),
             sParameterName,
@@ -185,7 +191,7 @@ const utils = {
             sParameterName = sURLVariables[i].split('=');
 
             if (sParameterName[0] === sParam) {
-                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                return sParameterName[1] === undefined ? "" : decodeURIComponent(sParameterName[1]);
             }
         }
     }

@@ -1,29 +1,25 @@
-import { User } from "./User";
-import { UserState } from "./UserState";
+import { User } from "../../shared/Models/User/User";
+import { Socket } from "socket.io";
 
 const TIMER_LENGTH: number = 5000;
 
 export class ServerState {
-    private socket: any;
-    private userState: UserState;
+    /*
+    private socket: Socket;
 
     private timerIds: Array<string>;
     private timers: Array<any>;
 
-    constructor(socket: any) {
+    constructor(socket: Socket) {
         this.socket = socket;
-        this.userState = new UserState();
 
         this.timerIds = [];
         this.timers = [];
     }
 
-    public GetUserState() {
-        return this.userState;
-    }
 
     public IsUserTyping(user: User): boolean {
-        return this.timerIds.indexOf(user.id) !== -1;
+        return this.timerIds.indexOf(user.socket) !== -1;
     }
 
     public GetUsersTyping(): Array<User> {
@@ -40,14 +36,14 @@ export class ServerState {
         }
 
         let timer = this.SetTimer(user);
-        this.timerIds.push(user.id);
+        this.timerIds.push(user.username);
         this.timers.push(timer);
         return true;
     }
 
 
     private ResetTimer(user: User) {
-        let timerIndex = this.timerIds.indexOf(user.id)
+        let timerIndex = this.timerIds.indexOf(user.socket)
         let timer = this.timers[timerIndex];
         clearTimeout(timer);
         this.timers[timerIndex] = this.SetTimer(user);
@@ -80,4 +76,5 @@ export class ServerState {
         delete this.timerIds[timerIndex];
         delete this.timers[timerIndex];
     }
+    */
 }
