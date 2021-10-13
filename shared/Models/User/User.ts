@@ -5,7 +5,6 @@ export class User {
     public _id: ObjectId;
     public username: string;
 
-
     constructor(username: string) {
         this.username = username;
     }
