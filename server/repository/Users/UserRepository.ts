@@ -31,5 +31,10 @@ export class UserRepository extends BaseRepository<User> implements IUserReposit
         return result >= 1;
     }
 
+    public async readActiveUsers() {
+        const result = await this.collection.find({ activedevices: { $gte: 0 } });
+        return result;
+    }
+
 
 }

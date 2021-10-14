@@ -15,7 +15,7 @@ export abstract class BaseRepository<T extends { _id: ObjectId }> implements IBa
         return result.insertedId;
     }
     async update(item: T): Promise<Boolean> {
-        const result: UpdateWriteOpResult = await this.collection.updateOne({}, item);
+        const result: UpdateWriteOpResult = await this.collection.replaceOne({ _id: item._id }, item);
 
         return !result.result.ok;
     }

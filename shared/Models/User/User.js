@@ -8,6 +8,7 @@ var User = /** @class */ (function () {
             return "Id: " + _this._id + " \r\nUsername: " + _this.username + " \r\n";
         };
         this.username = username;
+        this.activeDevices = 0;
     }
     return User;
 }());

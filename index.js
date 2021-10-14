@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 app.post('/', async function (req, res) {
     let username = req.body.username;
 
-    if (await client.CheckUserExists(username)) {
+    if (!await client.CheckUserExists(username)) {
         res.sendFile(__dirname + '/index.html');
         return;
     }

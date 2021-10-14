@@ -42,7 +42,6 @@ var ChatHistoryRepository_1 = require("../repository/ChatHistory/ChatHistoryRepo
 var Message_1 = require("../../shared/Models/Message/Message");
 var mongodb_1 = require("mongodb");
 var uuid_1 = require("uuid");
-var User_1 = require("../../shared/Models/User/User");
 var ServerClient = /** @class */ (function () {
     function ServerClient(io, serverState) {
         var _this = this;
@@ -69,34 +68,36 @@ var ServerClient = /** @class */ (function () {
     ServerClient.prototype.setupClient = function () {
         var _this = this;
         this.io.on('connection', function (socket) { return __awaiter(_this, void 0, void 0, function () {
-            var username, usernameAlreadyExists, user, userId, connectedUsers, data, messages;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var username, user, allUsers, payload, messages;
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         username = socket.handshake.query.username.toString();
                         console.log(username + " has connected");
-                        return [4 /*yield*/, this.userrepository.readIsUsernameInUse(username)];
+                        return [4 /*yield*/, this.userrepository.readUserByUsername(username)];
                     case 1:
-                        usernameAlreadyExists = _a.sent();
-                        if (usernameAlreadyExists) {
+                        user = _c.sent();
+                        if (!user) {
                             return [2 /*return*/];
                         }
-                        user = new User_1.User(username);
-                        return [4 /*yield*/, this.userrepository.create(user)];
+                        user.activeDevices++;
+                        return [4 /*yield*/, this.userrepository.update(user)];
                     case 2:
-                        userId = _a.sent();
-                        return [4 /*yield*/, this.userrepository.readAllUsernames()];
+                        _c.sent();
+                        return [4 /*yield*/, this.userrepository.readAll()];
                     case 3:
-                        connectedUsers = _a.sent();
-                        data = {
-                            username: user.username,
-                            text: user.username + " has joined the chat",
-                            connectedusers: connectedUsers
+                        allUsers = _c.sent();
+                        payload = {
+                            username: username,
+                            message: user.username + " has joined the chat",
+                            onlineUsers: (_a = allUsers.filter(function (user) { return user.activeDevices > 0; }).map(function (user) { return user.username; })) !== null && _a !== void 0 ? _a : [],
+                            offlineUsers: (_b = allUsers.filter(function (user) { return user.activeDevices <= 0; }).map(function (user) { return user.username; })) !== null && _b !== void 0 ? _b : []
                         };
-                        this.io.emit("user_join", data);
+                        this.io.emit("user_join", payload);
                         return [4 /*yield*/, this.chathistoryrepository.readAll()];
                     case 4:
-                        messages = _a.sent();
+                        messages = _c.sent();
                         socket.emit("load_chat", messages);
                         this.setupSocketEventHandlers(socket);
                         return [2 /*return*/];
@@ -129,28 +130,33 @@ var ServerClient = /** @class */ (function () {
         }); });
         //user disconnected
         socket.on('disconnect', function () { return __awaiter(_this, void 0, void 0, function () {
-            var username, user, data;
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var username, user, connectedUsers, allUsers, payload;
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         username = socket.handshake.query.username.toString();
                         console.log(username + " has disconnected");
                         return [4 /*yield*/, this.userrepository.readUserByUsername(username)];
                     case 1:
-                        user = _b.sent();
-                        return [4 /*yield*/, this.userrepository.delete(user)];
+                        user = _c.sent();
+                        user.activeDevices--;
+                        return [4 /*yield*/, this.userrepository.update(user)];
                     case 2:
-                        _b.sent();
-                        _a = {
-                            username: username,
-                            text: username + " has left the chat"
-                        };
+                        _c.sent();
                         return [4 /*yield*/, this.userrepository.readAllUsernames()];
                     case 3:
-                        data = (_a.connectedusers = _b.sent(),
-                            _a);
-                        this.io.emit('user_leave', data);
+                        connectedUsers = _c.sent();
+                        return [4 /*yield*/, this.userrepository.readAll()];
+                    case 4:
+                        allUsers = _c.sent();
+                        payload = {
+                            username: username,
+                            message: user.username + " has joined the chat",
+                            onlineUsers: (_a = allUsers.filter(function (user) { return user.activeDevices > 0; }).map(function (user) { return user.username; })) !== null && _a !== void 0 ? _a : [],
+                            offlineUsers: (_b = allUsers.filter(function (user) { return user.activeDevices <= 0; }).map(function (user) { return user.username; })) !== null && _b !== void 0 ? _b : []
+                        };
+                        this.io.emit('user_leave', payload);
                         return [2 /*return*/];
                 }
             });
