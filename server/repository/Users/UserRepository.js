@@ -100,6 +100,31 @@ var UserRepository = /** @class */ (function (_super) {
             });
         });
     };
+    UserRepository.prototype.readActiveUsers = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.collection.find({ activedevices: { $gte: 0 } }).toArray()];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
+    UserRepository.prototype.resetActiveUsers = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.collection.updateMany({}, { $set: { activeDevices: 0 } })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     return UserRepository;
 }(BaseRepository_1.BaseRepository));
 exports.UserRepository = UserRepository;

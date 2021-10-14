@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from "../shared/Models/Message/Message";
 import { User } from "../shared/Models/User/User";
+import { UserLogInPayload, UserLogOutPayload } from '../shared/Payloads/UserEventPayloads';
 
 
 const MessageItem = (props) => (
@@ -55,14 +56,29 @@ const ChatBox = (props) => {
     )
 };
 
-const SidebarOnline = (props) => {
+interface SidebarOnlineProps {
+    onlineUsers: string[]
+    offlineUsers: string[]
+}
+
+const SidebarOnline = (props: SidebarOnlineProps) => {
     return (
         <div id='sidebar-online'>
             <div>
-                <span>Users Online -- {props.users.length}</span>
+                <span>Online -- {props.onlineUsers.length}</span>
             </div>
             <ul id='sidebar-list'>
-                {props.users.map((user) => {
+                {props.onlineUsers.map((user) => {
+                    return (
+                        <li className='sidebar-list__item' key={user}>{user}</li>
+                    )
+                })}
+            </ul>
+            <div>
+                <span>Offline -- {props.offlineUsers.length}</span>
+            </div>
+            <ul id='sidebar-list'>
+                {props.offlineUsers.map((user) => {
                     return (
                         <li className='sidebar-list__item' key={user}>{user}</li>
                     )
@@ -77,7 +93,8 @@ const App = () => {
     const [socket, setSocket] = React.useState(null);
     const [ownUsername, setOwnUsername] = useState<string>(utils.getUrlParameter('username'));
     const [messages, setMessages] = useState<string[]>([]);
-    const [users, setUsers] = useState<string[]>([ownUsername]);
+    const [onlineUsers, setOnlineUsers] = useState<string[]>([ownUsername]);
+    const [offlineUsers, setOfflineUsers] = useState<string[]>([]);
     const [chat, setChat] = useState("");
     const [usersTyping, setUsersTyping] = useState([]);
 
@@ -131,17 +148,18 @@ const App = () => {
             setMessages(msgs => msgs.concat(message));
         });
 
-        socket.on('user_join', (data) => {
-            setUsers(data.connectedusers);
+        socket.on('user_join', (data: UserLogInPayload) => {
+            setOnlineUsers(data.onlineUsers);
+            setOfflineUsers(data.offlineUsers);
             if (data.username === ownUsername) return;
 
-            setMessages(msgs => msgs.concat(data.text));
+            setMessages(msgs => msgs.concat(data.message));
         });
 
-        socket.on('user_leave', (data) => {
-
-            setMessages(msgs => msgs.concat(data.text));
-            setUsers(data.connectedusers);
+        socket.on('user_leave', (data: UserLogOutPayload) => {
+            setOnlineUsers(data.onlineUsers);
+            setOfflineUsers(data.offlineUsers);
+            setMessages(msgs => msgs.concat(data.message));
         });
 
         socket.on('users_typing', (usersTyping) => {
@@ -168,7 +186,7 @@ const App = () => {
     return (
         <div id='container'>
             <MessageBox messages={messages} />
-            <SidebarOnline users={users} />
+            <SidebarOnline onlineUsers={onlineUsers} offlineUsers={offlineUsers} />
             <ChatBox
                 onChange={handleChange}
                 onSubmit={handleSubmit}

@@ -5,6 +5,7 @@ import { ServerState } from "../state/ServerState";
 import { Socket } from "socket.io";
 import { MongoClient } from "mongodb";
 import { v4 as uuidv4 } from 'uuid';
+import { UserLogInPayload, UserLogOutPayload } from "../../shared/Payloads/UserEventPayloads";
 import { User } from "../../shared/Models/User/User";
 
 
@@ -29,7 +30,11 @@ export class ServerClient {
 
                 this.userrepository = new UserRepository(db);
                 this.chathistoryrepository = new ChatHistoryRepository(db)
+
+                this.userrepository.resetActiveUsers();
             });
+
+
     }
 
     public async CheckUserExists(username): Promise<Boolean> {
@@ -44,25 +49,26 @@ export class ServerClient {
 
             console.log(`${username} has connected`);
 
-            let usernameAlreadyExists = await this.userrepository.readIsUsernameInUse(username)
+            let user: User = await this.userrepository.readUserByUsername(username);
 
-            if (usernameAlreadyExists) {
+            if (!user) {
                 return;
             }
 
-            let user = new User(username);
+            user.activeDevices++;
+            await this.userrepository.update(user);
 
-            let userId = await this.userrepository.create(user);
+            let allUsers = await this.userrepository.readAll();
 
-            let connectedUsers = await this.userrepository.readAllUsernames();
+            let payload: UserLogInPayload =
+            {
+                username: username,
+                message: `${user.username} has joined the chat`,
+                onlineUsers: allUsers.filter(user => user.activeDevices > 0).map(user => user.username) ?? [],
+                offlineUsers: allUsers.filter(user => user.activeDevices <= 0).map(user => user.username) ?? []
+            }
 
-            let data = {
-                username: user.username,
-                text: `${user.username} has joined the chat`,
-                connectedusers: connectedUsers
-            };
-
-            this.io.emit("user_join", data);
+            this.io.emit("user_join", payload);
 
             var messages = await this.chathistoryrepository.readAll();
 
@@ -105,15 +111,23 @@ export class ServerClient {
 
             let user = await this.userrepository.readUserByUsername(username);
 
-            await this.userrepository.delete(user);
+            user.activeDevices--;
 
-            let data = {
+            await this.userrepository.update(user);
+
+            let connectedUsers = await this.userrepository.readAllUsernames();
+
+            let allUsers = await this.userrepository.readAll();
+
+            let payload: UserLogOutPayload =
+            {
                 username: username,
-                text: `${username} has left the chat`,
-                connectedusers: await this.userrepository.readAllUsernames()
-            };
+                message: `${user.username} has joined the chat`,
+                onlineUsers: allUsers.filter(user => user.activeDevices > 0).map(user => user.username) ?? [],
+                offlineUsers: allUsers.filter(user => user.activeDevices <= 0).map(user => user.username) ?? []
+            }
 
-            this.io.emit('user_leave', data);
+            this.io.emit('user_leave', payload);
         });
 
 
