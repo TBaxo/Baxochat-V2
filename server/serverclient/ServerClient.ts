@@ -30,7 +30,11 @@ export class ServerClient {
 
                 this.userrepository = new UserRepository(db);
                 this.chathistoryrepository = new ChatHistoryRepository(db)
+
+                this.userrepository.resetActiveUsers();
             });
+
+
     }
 
     public async CheckUserExists(username): Promise<Boolean> {

@@ -31,9 +31,13 @@ export class UserRepository extends BaseRepository<User> implements IUserReposit
         return result >= 1;
     }
 
-    public async readActiveUsers() {
-        const result = await this.collection.find({ activedevices: { $gte: 0 } });
+    public async readActiveUsers(): Promise<User[]> {
+        const result = await this.collection.find({ activedevices: { $gte: 0 } }).toArray();
         return result;
+    }
+
+    public async resetActiveUsers(): Promise<void> {
+        await this.collection.updateMany({}, { $set: { activeDevices: 0 } });
     }
 
 

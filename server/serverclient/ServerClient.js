@@ -53,6 +53,7 @@ var ServerClient = /** @class */ (function () {
             var db = result.db('Baxochat');
             _this.userrepository = new UserRepository_1.UserRepository(db);
             _this.chathistoryrepository = new ChatHistoryRepository_1.ChatHistoryRepository(db);
+            _this.userrepository.resetActiveUsers();
         });
     }
     ServerClient.prototype.CheckUserExists = function (username) {
