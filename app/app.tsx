@@ -1,105 +1,32 @@
 declare var require: any
-
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from 'uuid';
-import { Message } from "../shared/Models/Message/Message";
+
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import ReactDOM from 'react-dom';
+
 import { User } from "../shared/Models/User/User";
+import { Message } from "../shared/Models/Message/Message";
+
 import { UserLogInPayload, UserLogOutPayload } from '../shared/Payloads/UserEventPayloads';
 
+import { MessageBox } from './Components/MessageBox/MessageBox';
+import { ChatBox } from './Components/ChatBox/ChatBox';
+import { SidebarOnline } from './Components/SidebarOnline/SideBarOnline';
 
-const MessageItem = (props) => (
-    <li>
-        {props.message}
-    </li>
-);
-
-
-const MessageBox = (props) => (
-    <ul id='messages'>
-        {props.messages.map((message) => {
-            return (
-                <MessageItem
-                    message={message}
-                    key={uuidv4()}
-                />
-            )
-        })}
-    </ul>
-);
-
-const ChatBox = (props) => {
-    //contains div, input and button
-    const convertUsersTypingToString = (usersTyping) => {
-        if (usersTyping.length <= 0) return "";
-
-        if (usersTyping.length === 1) return `${usersTyping[0]} is typing...`;
-
-        if (usersTyping.length === 3) return `Several users are typing...`
-
-        return `${usersTyping.join(' and ')} are typing...`
-    };
-
-    return (
-        <div id='chat'>
-            <form id='chat-form' onSubmit={props.onSubmit}>
-                <input id="m" autoComplete='off' value={props.value} onChange={props.onChange} />
-                <button>Send</button>
-            </form>
-            <div>
-                <span>
-                    {convertUsersTypingToString(props.usersTyping)}
-                </span>
-            </div>
-        </div>
-    )
-};
-
-interface SidebarOnlineProps {
-    onlineUsers: string[]
-    offlineUsers: string[]
-}
-
-const SidebarOnline = (props: SidebarOnlineProps) => {
-    return (
-        <div id='sidebar-online'>
-            <div>
-                <span>Online -- {props.onlineUsers.length}</span>
-            </div>
-            <ul id='sidebar-list'>
-                {props.onlineUsers.map((user) => {
-                    return (
-                        <li className='sidebar-list__item' key={user}>{user}</li>
-                    )
-                })}
-            </ul>
-            <div>
-                <span>Offline -- {props.offlineUsers.length}</span>
-            </div>
-            <ul id='sidebar-list'>
-                {props.offlineUsers.map((user) => {
-                    return (
-                        <li className='sidebar-list__item' key={user}>{user}</li>
-                    )
-                })}
-            </ul>
-        </div >
-    )
-};
 
 const App = () => {
 
-    const [socket, setSocket] = React.useState(null);
+    const [socket, setSocket] = useState<Socket>(null);
     const [ownUsername, setOwnUsername] = useState<string>(utils.getUrlParameter('username'));
     const [messages, setMessages] = useState<string[]>([]);
     const [onlineUsers, setOnlineUsers] = useState<string[]>([ownUsername]);
     const [offlineUsers, setOfflineUsers] = useState<string[]>([]);
-    const [chat, setChat] = useState("");
+    const [chat, setChat] = useState<string>("");
     const [usersTyping, setUsersTyping] = useState([]);
 
 
-    const handleChange = (event) => {
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         setChat(event.target.value);
 
         if (!socket) return;
@@ -107,7 +34,7 @@ const App = () => {
         socket.emit('user_typing', ownUsername);
     }
 
-    const handleSubmit = (event) => {
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         if (!chat) return;
