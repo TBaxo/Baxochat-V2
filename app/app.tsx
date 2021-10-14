@@ -1,5 +1,5 @@
 declare var require: any
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from 'uuid';
 
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
@@ -17,12 +17,12 @@ import { SidebarOnline } from './Components/SidebarOnline/SideBarOnline';
 
 const App = () => {
 
-    const [socket, setSocket] = React.useState(null);
+    const [socket, setSocket] = useState<Socket>(null);
     const [ownUsername, setOwnUsername] = useState<string>(utils.getUrlParameter('username'));
     const [messages, setMessages] = useState<string[]>([]);
     const [onlineUsers, setOnlineUsers] = useState<string[]>([ownUsername]);
     const [offlineUsers, setOfflineUsers] = useState<string[]>([]);
-    const [chat, setChat] = useState("");
+    const [chat, setChat] = useState<string>("");
     const [usersTyping, setUsersTyping] = useState([]);
 
 
