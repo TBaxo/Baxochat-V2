@@ -10,7 +10,7 @@ import { User } from "../../shared/Models/User/User";
 
 
 /**
- *This is a thing
+ * This is a class for separating out server code from routing code in index.ts
  */
 export class ServerClient {
 
