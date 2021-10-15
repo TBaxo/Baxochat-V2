@@ -42,11 +42,13 @@ var ChatHistoryRepository_1 = require("../repository/ChatHistory/ChatHistoryRepo
 var Message_1 = require("../../shared/Models/Message/Message");
 var mongodb_1 = require("mongodb");
 var uuid_1 = require("uuid");
+/**
+ *This is a thing
+ */
 var ServerClient = /** @class */ (function () {
-    function ServerClient(io, serverState) {
+    function ServerClient(io) {
         var _this = this;
         this.io = io;
-        this.state = serverState;
         this.setupClient();
         mongodb_1.MongoClient.connect('mongodb://localhost:27017')
             .then(function (result) {

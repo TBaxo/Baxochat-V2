@@ -2,25 +2,26 @@ import { UserRepository } from "../repository/Users/UserRepository"
 import { ChatHistoryRepository } from "../repository/ChatHistory/ChatHistoryRepository"
 import { Message } from "../../shared/Models/Message/Message";
 import { ServerState } from "../state/ServerState";
-import { Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { MongoClient } from "mongodb";
 import { v4 as uuidv4 } from 'uuid';
 import { UserLogInPayload, UserLogOutPayload } from "../../shared/Payloads/UserEventPayloads";
 import { User } from "../../shared/Models/User/User";
 
 
-
+/**
+ * This is a class for separating out server code from routing code in index.ts
+ */
 export class ServerClient {
 
-    private io: Socket;
+    private io: Server;
     private state: ServerState;
 
     private userrepository: UserRepository;
     private chathistoryrepository: ChatHistoryRepository;
 
-    constructor(io: Socket, serverState: ServerState) {
+    constructor(io: Server) {
         this.io = io;
-        this.state = serverState;
         this.setupClient();
 
 
