@@ -43,14 +43,14 @@ var Message_1 = require("../../shared/Models/Message/Message");
 var mongodb_1 = require("mongodb");
 var uuid_1 = require("uuid");
 /**
- *This is a thing
+ * This is a class for separating out server code from routing code in index.ts
  */
 var ServerClient = /** @class */ (function () {
     function ServerClient(io) {
         var _this = this;
         this.io = io;
         this.setupClient();
-        mongodb_1.MongoClient.connect('mongodb://localhost:27017')
+        mongodb_1.MongoClient.connect('mongodb://host.docker.internal')
             .then(function (result) {
             var db = result.db('Baxochat');
             _this.userrepository = new UserRepository_1.UserRepository(db);

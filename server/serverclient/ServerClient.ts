@@ -25,7 +25,7 @@ export class ServerClient {
         this.setupClient();
 
 
-        MongoClient.connect('mongodb://localhost:27017')
+        MongoClient.connect('mongodb://mongodb')
             .then((result: MongoClient) => {
                 const db = result.db('Baxochat');
 
