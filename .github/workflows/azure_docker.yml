@@ -27,7 +27,7 @@ jobs:
       
     - uses: azure/webapps-deploy@v2
       with:
-        app-name: 'baxochat'
+        app-name: 'baxochatV2'
         images: 'baxochat.azurecr.io/baxochat-v2:latest'
     
     - name: Azure logout
