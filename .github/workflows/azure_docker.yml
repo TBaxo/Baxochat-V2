@@ -1,0 +1,36 @@
+on: [push]
+
+name: azure_docker_container_deploy
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    # checkout the repo
+    - name: 'Checkout Github Action' 
+      uses: actions/checkout@master
+    
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - uses: azure/docker-login@v1
+      with:
+        login-server: baxochat.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    
+    - run: |
+        docker build . -t baxochat.azurecr.io/baxochat-v2:latest
+        docker push baxochat.azurecr.io/baxochat-v2:latest
+      
+    - uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'baxochat'
+        images: 'baxochat.azurecr.io/baxochat-v2:latest'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+    
+    - name: Azure logout
+      run: |
+        az logout
