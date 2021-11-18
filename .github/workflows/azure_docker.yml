@@ -13,9 +13,7 @@ jobs:
     - name: 'Login via Azure CLI'
       uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_CLIENTID }}
-        tenant-id: ${{ secrets.AZURE_TENANTID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }} 
+        credentials: ${{ secrets.AZURE_CREDENTIALS }}
     
     - uses: azure/docker-login@v1
       with:
